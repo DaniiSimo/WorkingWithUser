@@ -1,0 +1,36 @@
+<?php
+
+namespace App\Http\Middleware;
+
+use App\Models\User;
+use Closure;
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+class AuthenticateByHeader
+{
+    /**
+     * Handle an incoming request.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param \Closure(\Illuminate\Http\Request): (\Illuminate\Http\Response|\Illuminate\Http\RedirectResponse) $next
+     * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
+     * @throws AuthenticationException
+     */
+    public function handle(Request $request, Closure $next)
+    {
+        if(!$request->hasHeader(key: 'User-Id'))
+            throw new AuthenticationException();
+
+        $id = $request->headers->get(key: 'User-Id');
+        $user = User::find($id);
+
+        if(is_null(value: $user))
+            throw new AuthenticationException();
+
+        Auth::login(user: $user);
+
+        return $next($request);
+    }
+}
