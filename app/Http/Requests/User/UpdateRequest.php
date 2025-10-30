@@ -28,7 +28,7 @@ class UpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'username' => ['nullable','string', 'max:255', 'unique:users,username'],
+            'username' => ['nullable','string', 'max:255', 'unique:users,username', 'regex:/^[A-Za-z]+$/'],
             'name' => ['nullable', 'string', 'max:255'],
         ];
     }

@@ -29,7 +29,7 @@ class StoreRequest extends FormRequest
     {
         return [
             'email' => ['required','email', 'max:255', 'unique:users,email'],
-            'username' => ['required','string', 'max:255', 'unique:users,username'],
+            'username' => ['required','string', 'max:255', 'unique:users,username', 'regex:/^[A-Za-z]+$/'],
             'name' => ['nullable', 'string', 'max:255'],
         ];
     }
