@@ -1,64 +1,153 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+# WorkingWithUser — REST API на Laravel + Backpack
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Мини-проект на **Laravel 9+** с админ-панелью **Backpack** и REST API для управления пользователями: регистрация, получение профиля авторизованного пользователя, обновление, удаление, а также блокировка пользователя через админку. Проект реализует требования тестового задания PHP Developer
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 📋 Содержание
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- [Стек и требования](#стек-и-требования)
+- [Быстрый старт (установка и запуск)](#быстрый-старт-установка-и-запуск)
+- [API-маршруты](#api-маршруты)
+- [Админ-панель](#админ-панель)
+- [Бизнес-правила и валидация](#бизнес-правила-и-валидация)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## ⚙️ Стек и требования
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- PHP **8+**
+- Laravel **9+**
+- PostgreSQL
+- Composer, Git
+- Backpack **5**
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+> БД выбрана согласно требованиям ТЗ (PostgreSQL). При желании можно использовать другую СУБД, отредактировав `.env`.
 
-## Laravel Sponsors
+---
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+## 🚀 Быстрый старт (установка и запуск)
 
-### Premium Partners
+```bash
+# 1) Клонируем репозиторий
+git clone https://github.com/DaniiSimo/WorkingWithUser.git
+cd WorkingWithUser
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+# 2) Ставим зависимости
+composer install
 
-## Contributing
+# 3) Создаём .env из примера
+cp .env.example .env
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+# 4) Прописываем параметры подключения к БД в .env
 
-## Code of Conduct
+# 5) Генерируем ключ приложения
+php artisan key:generate
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+# 6) Ставим Backpack
+php artisan backpack:install
+# На вопрос:
+# "Would you like to install Backpack DevTools? (yes/no)"
+# отвечаем: no
 
-## Security Vulnerabilities
+# 7) Прогоняем миграции
+php artisan migrate
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+# 8) Запускаем локальный сервер
+php artisan serve
+# Приложение будет доступно на http://localhost:8000
+```
+## 🛠️ API-маршруты
 
-## License
+Все маршруты находятся в `routes/api.php`:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```php
+Route::controller(UserController::class)->group(callback: function () {
+    Route::post(uri: 'users', action: 'store');
+    Route::middleware('auth.api')->group(callback: function () {
+        Route::get(uri: 'users', action: 'show');
+        Route::put(uri: 'users', action: 'update');
+        Route::delete(uri: 'users', action: 'destroy');
+    });
+});
+```
+
+| Метод  | Путь         | Описание                                       | Требуемые заголовки          |
+| :----- | :------------ | :--------------------------------------------- | :---------------------------- |
+| **POST**   | `/api/users` | Регистрация нового пользователя                | —                            |
+| **GET**    | `/api/users` | Получение профиля авторизованного пользователя | `User-Id: <ID пользователя>` |
+| **PUT**    | `/api/users` | Обновление `username` и/или `name`             | `User-Id: <ID пользователя>` |
+| **DELETE** | `/api/users` | Удаление пользователя                          | `User-Id: <ID пользователя>` |
+
+
+## 🧭 Админ-панель
+
+**Главная страница:** `/`  
+При открытии корневого URL загружается административная панель **Laravel Backpack**.
+
+---
+
+### 🔐 Авторизация
+
+- Для входа в админку требуется **только адрес электронной почты**.
+- Пароль в данном pet-проекте **не используется** (упрощённая авторизация для демонстрации).
+
+---
+
+### ⚙️ Возможности панели
+
+- Просмотр списка всех зарегистрированных пользователей.
+- Редактирование полей:
+    - `name` — имя пользователя
+    - `username` — уникальное имя учётной записи
+- Управление статусом пользователя с помощью чекбокса **«Заблокирован»**:
+    - Активный пользователь — имеет доступ к API.
+    - Заблокированный пользователь — при API-запросе, требующем авторизацию получает ответ:
+      ```json
+      { "message": "User is blocked" }
+      ```
+
+---
+
+## 📑 Бизнес-правила и валидация
+
+### 1) Регистрация пользователя (POST `/api/users`)
+**Требования:**
+- `email` — **обязателен**, корректный формат email, **уникален**.
+- `username` — **обязателен**, строка, максимум 255 символов, только латинские символы, **уникален**.
+- `name` — необязателен, строка, максимум 255 символов.
+
+**Валидация:**
+- `email` — **уникален** в системе.
+- `username` — **уникален** в системе.
+---
+
+### 2) Получение информации о пользователе (GET `/api/users`)
+
+**Требования:**
+- Обязателен заголовок `User-Id`.
+---
+
+---
+
+### 3) Обновление профиля (PUT `/api/users`)
+
+**Требования:**
+- Обязателен заголовок `User-Id`.
+- Разрешено изменять только поля:
+    - `username`
+    - `name`
+
+**Валидация:**
+- `username` — строка, максимум 255 символов, только латинские символы, **уникален**.
+- `name` — строка, максимум 255 символов.
+
+---
+
+### 4) Удаление пользователя (DELETE `/api/users`)
+
+**Требования:**
+- Обязателен заголовок `User-Id`.
+---
+
+
