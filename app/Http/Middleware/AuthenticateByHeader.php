@@ -29,6 +29,9 @@ class AuthenticateByHeader
         if(is_null(value: $user))
             throw new AuthenticationException();
 
+        if($user->is_blocked)
+            throw new AuthenticationException(message: 'User is blocked');
+
         Auth::login(user: $user);
 
         return $next($request);

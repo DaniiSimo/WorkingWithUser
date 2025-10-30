@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\LoginController;
 
 // --------------------------
 // Custom Backpack Routes
@@ -16,4 +17,9 @@ Route::group([
     ),
     'namespace'  => 'App\Http\Controllers\Admin',
 ], function () { // custom admin routes
-}); // this should be the absolute last line of this file
+    Route::crud('user', 'UserCrudController');
+});
+
+Route::middleware('web')->prefix(config('backpack.base.route_prefix'))->group(function () {
+    Route::post('login', [LoginController::class,'login']);
+});
